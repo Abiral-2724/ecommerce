@@ -16,6 +16,7 @@ import storeRoute from './routes/store.routes.js'
 import corporateRoute from './routes/corporate.routes.js'
 import blogRoute from './routes/blog.routes.js'
 import analyticsRoute from './routes/analytics.routes.js' ;
+import warrantyRoute from './routes/warranty.routes.js' ;
 const app = express() ; 
 
 dotenv.config({}) ; 
@@ -85,6 +86,8 @@ app.use('/api/v1/corporate' ,corporateRoute) ;
 app.use('/api/v1/blog' ,blogRoute) ;
 
 app.use('/api/v1/analytics', analyticsRoute);
+
+app.use('/api/v1/warranty' ,warrantyRoute) ;
 
 app.get('/health', (req, res) => {
   res.status(200).json({ 
