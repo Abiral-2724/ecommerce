@@ -12,9 +12,9 @@ const generateClaimId = async () => {
 
   let code = makeCode();
   // extremely unlikely to collide, but guard against it anyway
-  // while (await client.warrantyClaim.findUnique({ where: { claimId: code } })) {
-  //   code = makeCode();
-  // }
+  while (await client.warrantyClaim.findUnique({ where: { claimId: code } })) {
+    code = makeCode();
+  }
   return code;
 };
 
@@ -26,10 +26,13 @@ const uploadBuffer = (file, resourceType = 'auto') =>
 
 // Fields we're happy to expose to the CUSTOMER when they check status
 // (i.e. no internalNotes, no raw userId, etc.)
+const VALID_PLATFORMS = ['AMAZON', 'FLIPKART', 'OFFICIAL_WEBSITE', 'MYNTRA', 'OFFLINE'];
+
 const toPublicClaim = (claim) => ({
   claimId: claim.claimId,
   productName: claim.productName,
   productModel: claim.productModel,
+  purchasedFrom: claim.purchasedFrom,
   status: claim.status,
   createdAt: claim.createdAt,
   updatedAt: claim.updatedAt,
@@ -66,15 +69,23 @@ export const createWarrantyClaim = async (req, res) => {
       productModel,
       orderId,
       purchaseDate,
+      purchasedFrom,
       reason,
     } = req.body;
 
-    const required = { fullName, mobileNumber, email, productName, productModel, reason };
+    const required = { fullName, mobileNumber, email, productName, productModel, purchasedFrom, reason };
     const missing = Object.entries(required).filter(([, v]) => !v).map(([k]) => k);
     if (missing.length) {
       return res.status(400).json({
         success: false,
         message: `Missing required fields: ${missing.join(', ')}`,
+      });
+    }
+
+    if (!VALID_PLATFORMS.includes(purchasedFrom)) {
+      return res.status(400).json({
+        success: false,
+        message: `purchasedFrom must be one of: ${VALID_PLATFORMS.join(', ')}`,
       });
     }
 
@@ -106,6 +117,7 @@ export const createWarrantyClaim = async (req, res) => {
         productModel,
         orderId: orderId || null,
         purchaseDate: purchaseDate ? new Date(purchaseDate) : null,
+        purchasedFrom,
         reason,
         status: 'CLAIM_RECEIVED',
         history: {

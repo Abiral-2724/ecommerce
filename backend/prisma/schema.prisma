@@ -500,18 +500,28 @@ enum AttachmentType {
   PRODUCT_IMAGE
   PRODUCT_VIDEO
 }
+
+enum PurchasePlatform {
+  AMAZON
+  FLIPKART
+  OFFICIAL_WEBSITE
+  MYNTRA
+  OFFLINE
+}
+
 model WarrantyClaim {
-  id            String         @id @default(uuid())
-  claimId       String         @unique // human-readable e.g. WC-7F3K9A
-  userId        String?
-  fullName      String
-  mobileNumber  String
-  email         String
-  productName   String
-  productModel  String
-  orderId       String?
-  purchaseDate  DateTime?
-  reason        String
+  id             String           @id @default(uuid())
+  claimId        String           @unique // human-readable e.g. WC-7F3K9A
+  userId         String?
+  fullName       String
+  mobileNumber   String
+  email          String
+  productName    String
+  productModel   String
+  orderId        String?
+  purchaseDate   DateTime?
+  purchasedFrom  PurchasePlatform
+  reason         String
   status        WarrantyStatus @default(CLAIM_RECEIVED)
   internalNotes String?
   createdAt     DateTime       @default(now())
@@ -542,5 +552,3 @@ model WarrantyStatusHistory {
 
   warrantyClaim WarrantyClaim @relation(fields: [claimId], references: [id], onDelete: Cascade)
 }
-
-
